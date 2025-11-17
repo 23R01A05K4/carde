@@ -1,0 +1,30 @@
+
+import numpy as np
+
+class HMM:
+    def __init__(self, states, observations):
+        self.states = states
+        self.n_states = len(states)
+        self.n_obs = len(observations)
+        self.state_index = {state: i for i, state in enumerate(states)}
+        self.obs_index = {obs: i for i, obs in enumerate(observations)}
+        self.A = np.array([[0.6, 0.3, 0.1], [0.2, 0.5, 0.3], [0.1, 0.4, 0.5]])
+        self.B = np.array([[0.8, 0.15, 0.05], [0.3, 0.4, 0.3], [0.1, 0.2, 0.7]])
+        self.pi = np.array([0.5, 0.3, 0.2])
+
+    def forward(self, obs_seq):
+        n = len(obs_seq)
+        alpha = np.zeros((n, self.n_states))
+        alpha[0] = self.pi * self.B[:, obs_seq[0]]
+        for t in range(1, n):
+            for j in range(self.n_states):
+                alpha[t, j] = (alpha[t - 1] @ self.A[:, j]) * self.B[j, obs_seq[t]]
+        return alpha.sum(axis=1)[-1]
+
+states = ['Sunny', 'Cloudy', 'Rainy']
+observations = ['Umbrella', 'Normal', 'Raincoat']
+hmm = HMM(states, observations)
+obs_seq = ['Umbrella', 'Normal', 'Umbrella', 'Raincoat']
+obs_seq_indices = [hmm.obs_index[obs] for obs in obs_seq]
+prob = hmm.forward(obs_seq_indices)
+print(f"Probability of the observation sequence '{obs_seq}': {prob:.4f}")
