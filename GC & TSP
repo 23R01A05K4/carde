@@ -1,29 +1,24 @@
 #graph coloring
 colors = ['Red', 'Blue', 'Green']
 states = ['a', 'b', 'c', 'd']
-
 neighbors = {
     'a': ['b', 'c', 'd'],
     'b': ['a', 'd'],
-    'c': ['a', 'd'],
-    'd': ['a', 'b', 'c']
+    'c': [],
+    'd': []
 }
-
-color_assignment = {}
-
-def is_promising(state, color):
-    for neighbor in neighbors[state]:
-        if color_assignment.get(neighbor) == color:
-            return False
-    return True
-
+colors_of_states = {}
 for state in states:
     for color in colors:
-        if is_promising(state, color):
-            color_assignment[state] = color
+        clash = False
+        for neighbour in neighbors:
+            if colors_of_states.get(neighbour) == color:
+                clash = True
+                break
+        if not clash:
+            colors_of_states[state] = color
             break
-
-print("Assigned Colors:", color_assignment)
+print(colors_of_states)
 
 #TSP
 from itertools import permutations
