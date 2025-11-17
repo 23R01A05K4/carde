@@ -1,0 +1,54 @@
+import math
+from collections import Counter
+
+def entropy(data, target_attr):
+    values = [record[target_attr] for record in data]
+    freq = Counter(values)
+    total = len(values)
+    return -sum((count/total) * math.log2(count/total) for count in freq.values())
+
+def info_gain(data, attr, target_attr):
+    total_entropy = entropy(data, target_attr)
+    values = [record[attr] for record in data]
+    freq = Counter(values)
+    total = len(data)
+    subset_entropy = sum((count/total) * entropy(
+        [record for record in data if record[attr] == val], target_attr)
+        for val, count in freq.items())
+    return total_entropy - subset_entropy
+
+def id3(data, attributes, target_attr):
+    values = [record[target_attr] for record in data]
+    if len(set(values)) == 1:
+        return values[0]
+    if not attributes:
+        return Counter(values).most_common(1)[0][0]
+    best_attr = max(attributes, key=lambda attr: info_gain(data, attr, target_attr))
+    tree = {best_attr: {}}
+    for val in set(record[best_attr] for record in data):
+        subset = [record for record in data if record[best_attr] == val]
+        tree[best_attr][val] = id3(subset, [attr for attr in attributes if attr != best_attr], target_attr) if subset else Counter(values).most_common(1)[0][0]
+    return tree
+
+dataset = [
+    {'Outlook': 'Sunny', 'Temperature': 'Hot', 'Humidity': 'High', 'Wind': 'Weak', 'PlayTennis': 'No'},
+    {'Outlook': 'Sunny', 'Temperature': 'Hot', 'Humidity': 'High', 'Wind': 'Strong', 'PlayTennis': 'No'},
+    {'Outlook': 'Overcast', 'Temperature': 'Hot', 'Humidity': 'High', 'Wind': 'Weak', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Rain', 'Temperature': 'Mild', 'Humidity': 'High', 'Wind': 'Weak', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Rain', 'Temperature': 'Cool', 'Humidity': 'Normal', 'Wind': 'Weak', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Rain', 'Temperature': 'Cool', 'Humidity': 'Normal', 'Wind': 'Strong', 'PlayTennis': 'No'},
+    {'Outlook': 'Overcast', 'Temperature': 'Cool', 'Humidity': 'Normal', 'Wind': 'Strong', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Sunny', 'Temperature': 'Mild', 'Humidity': 'High', 'Wind': 'Weak', 'PlayTennis': 'No'},
+    {'Outlook': 'Sunny', 'Temperature': 'Cool', 'Humidity': 'Normal', 'Wind': 'Weak', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Rain', 'Temperature': 'Mild', 'Humidity': 'Normal', 'Wind': 'Weak', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Sunny', 'Temperature': 'Mild', 'Humidity': 'Normal', 'Wind': 'Strong', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Overcast', 'Temperature': 'Mild', 'Humidity': 'High', 'Wind': 'Strong', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Overcast', 'Temperature': 'Hot', 'Humidity': 'Normal', 'Wind': 'Weak', 'PlayTennis': 'Yes'},
+    {'Outlook': 'Rain', 'Temperature': 'Mild', 'Humidity': 'High', 'Wind': 'Strong', 'PlayTennis': 'No'},
+]
+
+attributes = ['Outlook', 'Temperature', 'Humidity', 'Wind']
+target_attr = 'PlayTennis'
+
+decision_tree = id3(dataset, attributes, target_attr)
+print(decision_tree)
