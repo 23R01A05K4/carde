@@ -1,0 +1,49 @@
+#graph coloring
+colors = ['Red', 'Blue', 'Green']
+states = ['a', 'b', 'c', 'd']
+neighbours = {
+    'a': ['b', 'c', 'd'],
+    'b': ['a', 'd'],
+    'c': [],
+    'd': []
+}
+
+colors_of_states = {}
+
+for state in states:
+    for color in colors:
+        clash = False
+        for neighbour in neighbours[state]:
+            if colors_of_states.get(neighbour) == color:
+                clash = True
+                break
+        if not clash:
+            colors_of_states[state] = color
+            break
+
+print(colors_of_states)
+
+#TSP
+from itertools import permutations
+
+graph = [
+    [0, 10, 15, 20],
+    [10, 0, 35, 25],
+    [15, 35, 0, 30],
+    [20, 25, 30, 0]
+]
+start = 3
+cities = [0, 1, 2, 3]
+cities.remove(start)
+min_cost = float('inf')
+
+for order in permutations(cities):
+    cost = 0
+    current = start
+    for new_city in order:
+        cost += graph[current][new_city]
+        current = new_city
+    if cost < min_cost:
+        min_cost = cost
+
+print("Cost:", min_cost)
