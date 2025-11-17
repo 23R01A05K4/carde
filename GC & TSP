@@ -1,30 +1,48 @@
 #graph coloring
 colors = ['Red', 'Blue', 'Green']
 states = ['a', 'b', 'c', 'd']
-neighbours = {
+
+neighbors = {
     'a': ['b', 'c', 'd'],
     'b': ['a', 'd'],
-    'c': [],
-    'd': []
+    'c': ['a', 'd'],
+    'd': ['a', 'b', 'c']
 }
 
-colors_of_states = {}
+color_assignment = {}
+
+def is_promising(state, color):
+    for neighbor in neighbors[state]:
+        if color_assignment.get(neighbor) == color:
+            return False
+    return True
 
 for state in states:
     for color in colors:
-        clash = False
-        for neighbour in neighbours[state]:
-            if colors_of_states.get(neighbour) == color:
-                clash = True
-                break
-        if not clash:
-            colors_of_states[state] = color
+        if is_promising(state, color):
+            color_assignment[state] = color
             break
 
-print(colors_of_states)
+print("Assigned Colors:", color_assignment)
 
 #TSP
 from itertools import permutations
+
+def travelling_salesman(graph, start):
+    V = len(graph)
+    vertices = [i for i in range(V) if i != start]
+    min_path = float('inf')
+
+    for path in permutations(vertices):
+        cost = 0
+        k = start
+        for j in path:
+            cost += graph[k][j]
+            k = j
+        cost += graph[k][start]
+        min_path = min(min_path, cost)
+
+    return min_path
 
 graph = [
     [0, 10, 15, 20],
@@ -32,18 +50,5 @@ graph = [
     [15, 35, 0, 30],
     [20, 25, 30, 0]
 ]
-start = 3
-cities = [0, 1, 2, 3]
-cities.remove(start)
-min_cost = float('inf')
 
-for order in permutations(cities):
-    cost = 0
-    current = start
-    for new_city in order:
-        cost += graph[current][new_city]
-        current = new_city
-    if cost < min_cost:
-        min_cost = cost
-
-print("Cost:", min_cost)
+print("Minimum Cost Path:", travelling_salesman(graph, 3))
