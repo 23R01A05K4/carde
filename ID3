@@ -1,0 +1,60 @@
+import pandas as pd
+import math
+from collections import Counter
+from pprint import pprint
+
+def ent(ps):
+    return sum(-p * math.log(p, 2) for p in ps if p > 0)
+
+def ent_list(vals):
+    c = Counter(vals)
+    total = len(vals)
+    ps = [v / total for v in c.values()]
+    return ent(ps)
+
+def info_gain(df, attr, target):
+    groups = df.groupby(attr)
+    n = len(df)
+
+    agg = groups[target].agg([
+        ent_list,
+        lambda x: len(x) / n
+    ])
+
+    avg = sum(agg['ent_list'] * agg['<lambda_0>'])
+    old = ent_list(df[target])
+
+    return old - avg
+
+def id3(df, target, attrs, default=None):
+    c = Counter(df[target])
+
+    if len(c) == 1:
+        return next(iter(c))
+
+    if df.empty or not attrs:
+        return default
+
+    default = max(c, key=c.get)
+    gains = [info_gain(df, a, target) for a in attrs]
+
+    best = attrs[gains.index(max(gains))]
+    tree = {best: {}}
+
+    rem = [a for a in attrs if a != best]
+
+    for val, subset in df.groupby(best):
+        subtree = id3(subset, target, rem, default)
+        tree[best][val] = subtree
+
+    return tree
+
+df = pd.read_csv("weather.csv")
+
+attrs = list(df.columns)
+attrs.remove('PlayTennis')
+
+tree = id3(df, 'PlayTennis', attrs)
+
+print("Decision Tree:")
+pprint(tree)
