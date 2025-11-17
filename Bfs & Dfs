@@ -1,0 +1,45 @@
+#bfs
+graph = {
+    '1': ['2', '3'],
+    '2': ['4', '5'],
+    '3': [],
+    '4': [],
+    '5': ['6'],
+    '6': [],
+}
+visited=[]
+queue=[]
+def bfs(visited, graph, node):
+    visited.append(node)
+    queue.append(node)
+    while queue:
+        m = queue.pop(0)
+        print(m, end=" ")
+        for neighbour in graph[m]:
+            if neighbour not in visited:
+                visited.append(neighbour)
+                queue.append(neighbour)
+print("BFS NODES ARE:")
+bfs(visited,graph,"1") 
+
+# DFS 
+graph = {
+    '1': ['2', '3'],
+    '2': ['4', '5'],
+    '3': [],
+    '4': [],
+    '5': ['6'],
+    '6': [],
+}
+visited=[]
+stack=[]
+def dfs(visited,graph,node):
+    if node not in visited:
+        visited.append(node)
+        stack.append(node)
+        n=stack.pop()
+        print(n,end=" ")
+        for neighbour in graph[node]:
+            dfs(visited,graph,neighbour)
+print("DFS NODES ARE:")
+dfs(visited,graph,'1')
