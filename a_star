@@ -1,0 +1,34 @@
+def a_star(graph, start, goal, h):
+    open_list = [start]
+    cost = {start: 0}           
+    parent = {start: None}
+
+    while open_list:
+        current = min(open_list, key=lambda x: cost[x] + h[x])
+        if current == goal:
+            path = []
+            while current is not None:
+                path.append(current)
+                current = parent[current]
+            path.reverse()
+            print("Path found:", path)
+            return path
+        open_list.remove(current)
+        for (neigh, c) in graph.get(current, []):
+            new_cost = cost[current] + c
+            if neigh not in cost or new_cost < cost[neigh]:
+                cost[neigh] = new_cost
+                parent[neigh] = current
+                if neigh not in open_list:
+                    open_list.append(neigh)
+    print("No path!")
+    return None
+graph = {
+    'A': [('B', 2), ('E', 3)],
+    'B': [('C', 1), ('G', 9)],
+    'C': [],
+    'D': [('G', 1)],
+    'E': [('D', 6)],
+}
+h = {'A': 11, 'B': 6, 'C': 99, 'D': 1, 'E': 7, 'G': 0}
+a_star(graph, 'A', 'G', h)
